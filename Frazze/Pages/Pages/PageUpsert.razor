@@ -1,0 +1,107 @@
+﻿@page "/pages/create"
+@page "/pages/edit/{id:int}"
+@using Microsoft.AspNetCore.Components
+@inject IPagesRepository _pageRepository
+@inject IApplicationsRepository _applicationsRepository
+@inject NavigationManager _navigationManager
+@inject IJSRuntime _jsRuntime
+
+<div class="row my-2">
+    <h3 class="card-title text-primary mb-3 ml-3">@Title Page</h3>
+
+    <div class="col-10">
+    @if (IsLoading)
+    {
+        <div class="text-center">
+            <img src="/images/loading.gif">
+        </div>
+    }
+    else{
+            <EditForm Model="PageCode" OnValidSubmit="UpsertPage">
+                
+                <div class="form-group">
+                
+                    <label>Page</label>
+                    <InputText @bind-Value="PageCode.PageName" class="form-control"></InputText>
+                
+                    <label>Datum</label>
+                    <InputDate @bind-Value="PageCode.created" class="form-control"></InputDate>
+                </div>
+                
+                <br/>
+                <div class="form-group">
+
+                    <InputSelect @bind-Value="PageCode.ApplicationID" class="form-select">
+                        <option value="0" disabled="disabled" selected>--Välj App--</option>
+                        @foreach (var cat in AppCategory)
+                        {
+                            <option value="@cat.ApplicationID">@cat.ApplicationName</option>
+                        }
+                    </InputSelect>
+
+                </div>
+                
+
+                <div class="form-group py-2">
+                    <button class="btn btn-primary">@Title</button>
+                    <NavLink href="pages" class="btn btn-secondary"> Back to Pages</NavLink>
+                </div>
+
+        </EditForm>
+    }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PagesDTO PageCode { get; set; } = new PagesDTO();
+    private IEnumerable<ApplicationsDTO> AppCategory { get; set; } = new List<ApplicationsDTO>();
+    private string Title { get; set; } = "Create";
+
+    public bool IsLoading { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+
+            if (firstRender)
+            {
+                await LoadPh();
+            }
+        }
+    }
+
+    private async Task LoadPh()
+    {
+        IsLoading=true;
+        StateHasChanged();
+        AppCategory = await _applicationsRepository.GetAll();
+        if (Id!=0)
+        {
+    //update
+            Title = "update";
+            PageCode = await _pageRepository.Get(Id);
+        }
+        IsLoading=false;
+        StateHasChanged();
+    }
+
+    public async Task UpsertPage()
+    {
+        if (PageCode.ID==0)
+        {
+            //create
+            await _pageRepository.Create(PageCode);
+            await _jsRuntime.ToastrSuccess("Page created successfully.");
+        }
+        else
+        {
+            //update
+            await _pageRepository.Update(PageCode);
+            await _jsRuntime.ToastrSuccess("Pagee updated successfully.");
+        }
+        _navigationManager.NavigateTo("pages");
+    }
+}

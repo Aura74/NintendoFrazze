@@ -1,0 +1,211 @@
+﻿@page "/"
+@page "/phrase"
+@inject IPhrasesRepository _phrasesRepository
+@inject IJSRuntime _jsRuntime
+
+<_DeleteConfirmation IsParentComponentProcessing="IsLoading" ConfirmationChanged="ConfirmDelete_Click"></_DeleteConfirmation>
+
+<div class="row mt-4">
+    <div class="col-6">
+        @*        <h4 class="card-title text-primary lettersInHead">
+            
+            
+            <span class="" style="color:#009BD9">P</span>
+            <span style="color:#FCCF00">H</span>
+            <span style="color:#E62310">R</span>
+            <span style="color:#44AF35">A</span>
+            <span style="color:#FCCF00">S</span>
+            <span style="color:#E62310">E</span>
+            <span style="color:#44AF35">S</span>
+        </h4>*@
+        @*        <h4 class="card-title text-primary lettersInHead2">
+            
+            
+            <span class="" style="color:#009BD9">P</span>
+            <span style="color:#FCCF00">H</span>
+            <span style="color:#E62310">R</span>
+            <span style="color:#44AF35">A</span>
+            <span style="color:#FCCF00">S</span>
+            <span style="color:#E62310">E</span>
+            <span style="color:#44AF35">S</span>
+        </h4>*@
+        @*        <h4 class="card-title text-primary lettersInHead3">
+            
+            
+            <span class="" style="color:#009BD9">P</span>
+            <span style="color:#FCCF00">H</span>
+            <span style="color:#E62310">R</span>
+            <span style="color:#44AF35">A</span>
+            <span style="color:#FCCF00">S</span>
+            <span style="color:#E62310">E</span>
+            <span style="color:#44AF35">S</span>
+        </h4>*@
+        
+
+
+        <h4 class="card-title text-primary lettersInHead4">
+            <span class="LetterP" style="color:#009BD9">P</span>
+            <span class="LetterH" style="color:#FCCF00">H</span>
+            <span class="LetterR" style="color:#E62310">R</span>
+            <span class="LetterA" style="color:#44AF35">A</span>
+            <span class="LetterH" style="color:#FCCF00">S</span>
+            <span class="LetterR" style="color:#E62310">E</span>
+            <span class="LetterALast" style=" color:#44AF35">S</span>
+        </h4>
+    </div>
+
+    <div class="col-4 offset-2" >
+        <a href="phrase/create" class="btn btn-primary form-control" style="border-radius: 25px;">
+       
+            <div class="lettersInP">
+                <span class="LetterA" style="color:#44AF35">A</span>
+                <span class="LetterH" style="color:#FCCF00">D</span>
+                <span class="LetterR" style="color:#E62310">D</span>
+                <span class="LetterR" style="color:#FCCF00">-</span>
+                <span class="LetterP" style="color: #009BD9">N</span>
+                <span class="LetterH" style="color: #FCCF00">E</span>
+                <span class="LetterR" style="color: #E62310">W</span>
+                <span class="LetterR" style="color:#FCCF00">-</span>
+                <span class="LetterP" style="color: #009BD9">P</span>
+                <span class="LetterH" style="color: #FCCF00">H</span>
+                <span class="LetterR" style="color: #E62310">R</span>
+                <span class="LetterA" style="color: #44AF35">A</span>
+                <span class="LetterH" style="color: #FCCF00">S</span>
+                <span class="LetterR" style="color: #E62310">E</span>
+            </div>
+        </a>
+    </div>
+    
+
+    <div class="lineSM1"></div>
+    <div class="lineSM2"></div>
+    <div class="lineSM3"></div>
+    <div class="lineSM4"></div>
+    <div class="lineSM1"></div>
+    <div class="lineSM2"></div>
+    <div class="lineSM3"></div>
+    <div class="lineSM4"></div>
+    <div class="lineSM1"></div>
+    <div class="lineSM2"></div>
+    <div class="lineSM3"></div>
+    <div class="lineSM4"></div>
+
+    <div class="col-12 p-3">
+    @if (Phrases.Any())
+    {
+        <table class="table table-bordered">
+                <thead style="background-color:#FCCF00">
+            <tr>
+                <th>Phrase</th>
+                <th>Element</th>
+                <th>Orginal</th>
+                <th>Beskrivning</th>
+                <th>Culture</th>
+                <th>App</th>
+                <th>Sida</th>
+                <th>Knappar</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var objp in Phrases)
+            {
+                <tr>
+                    <td>
+                        @objp.Phrase
+                    </td> 
+                    <td>
+                        @objp.Element
+                    </td> 
+                    <td>
+                        @objp.OrginalPhrase
+                    </td> 
+                    <td>
+                        @objp.PhraseDescription
+                    </td> 
+                    <td>
+                        @objp.Cultures.Culture
+                    </td> 
+                    <td>
+                        @objp.Application.ApplicationName
+                    </td> 
+                    <td>
+                         Under Konstruktion       @*  @objp.Pages.PageName*@
+                    </td> 
+                    <td>
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                        <NavLink href="@($"phrase/edit/{objp.PhraseID}")" class="btn-primary btn">
+                            <i class="bi bi-pencil"></i> Edit
+                        </NavLink>
+
+                        <button class="btn btn-danger" @onclick="() => HandleDelete(objp.PhraseID)">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                                </div>
+                    </td>
+                </tr>
+            }
+            
+            </tbody>
+        </table>
+    }
+    
+    else
+    {
+        if (IsLoading)
+        {
+            //loading gif
+            <div class="text-center">
+                <img src="/images/loading.gif">
+            </div>
+        }
+        else
+        {
+            //no records
+            <p>No recrods found.</p>
+        }
+    }
+
+</div>
+</div>
+
+@code {
+    private IEnumerable<PhrasesDTO> Phrases { get; set; } = new List<PhrasesDTO>();
+    public bool IsLoading { get; set; }
+    private int DeletePhId { get; set; } = 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadPh();
+        }
+    }
+    private async Task LoadPh()
+    {
+        IsLoading=true;
+        StateHasChanged();
+        Phrases = await _phrasesRepository.GetAll();
+        IsLoading=false;
+        StateHasChanged();
+    }
+
+    private void HandleDelete(int id)
+    {
+        DeletePhId=id;
+        _jsRuntime.InvokeVoidAsync("ShowDeleteConfirmationModal");
+    }
+
+    public async Task ConfirmDelete_Click(bool isConfirmed)
+    {
+        IsLoading=true;
+        if (isConfirmed && DeletePhId!=0)
+        {
+            await Task.Delay(200);
+    //delete
+            await _phrasesRepository.Delete(DeletePhId);
+            await LoadPh();
+            await _jsRuntime.InvokeVoidAsync("HideDeleteConfirmationModal");
+        }
+        IsLoading=false;
+    }
+}

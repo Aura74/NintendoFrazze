@@ -1,0 +1,143 @@
+﻿@page "/phrase/create"
+@page "/phrase/edit/{id:int}"
+@using Microsoft.AspNetCore.Components
+@using Frazze_DataAccess
+@using Frazze.Helper
+@inject IPhrasesRepository _phrasesRepository
+@inject IApplicationsRepository _applicationsRepository
+@inject ICulturesRepository _cultureRepository
+@inject IPagesRepository _pagesRepository
+@inject NavigationManager _navigationManager
+@inject IJSRuntime _jsRuntime
+
+<div class="row my-2">
+    <h3 class="card-title text-primary mb-3 ml-3">@Title Phrase</h3>
+
+    <div class="col-10">
+    @if (IsLoading)
+    {
+        <div class="text-center">
+            <img src="/images/loading.gif">
+        </div>
+    }
+    else{
+            <EditForm Model="PhraseCode" OnValidSubmit="UpsertPhrase">
+            <DataAnnotationsValidator/>
+            @*<ValidationSummary/>*@
+            <div class="form-group">
+                
+                <label>Phrase</label>
+                <InputText @bind-Value="PhraseCode.Phrase" class="form-control"></InputText>
+                @*<ValidationMessage For="()=>PhraseCode.PhraseCode"></ValidationMessage>*@
+              
+                <label>Element</label>
+                <InputText @bind-Value="PhraseCode.Element" class="form-control"></InputText>
+                
+                <label>OrginalPhrase</label>
+                <InputText @bind-Value="PhraseCode.OrginalPhrase" class="form-control"></InputText>
+
+                <label>PhraseDescription</label>
+                <InputText @bind-Value="PhraseCode.PhraseDescription" class="form-control"></InputText>
+
+            </div>
+            
+
+            <br/>
+            
+            <div class="form-group col-12 d-inline-flex">
+               
+                <InputSelect @bind-Value="PhraseCode.AppId" class="form-select">
+                    <option value="0" disabled="disabled" selected>--Välj App--</option>
+                    @foreach (var cat in AppCategory)
+                    {
+                        <option value="@cat.ApplicationID">@cat.ApplicationName</option>
+                    }
+                </InputSelect>
+
+                
+                <InputSelect @bind-Value="PhraseCode.CultId" class="form-select">
+                    <option value="0" disabled="disabled" selected>--Välj Språk--</option>
+                    @foreach (var cat in ValCulture)
+                    {
+                        <option value="@cat.CultureID">@cat.Culture</option>
+                    }
+                </InputSelect>
+                
+                <InputSelect @bind-Value="PhraseCode.PageId" class="form-select">
+                    <option value="0" disabled="disabled" selected>--Välj Sida--</option>
+                    @foreach (var cat in ValPage)
+                    {
+                        <option value="@cat.ID">@cat.PageName</option>
+                    }
+                </InputSelect>
+
+            </div>
+            
+            <div class="form-group py-2">
+                @* <button class="btn btn-primary" type="submit">@Title</button>*@
+                <button class="btn btn-primary">@Title</button>
+                <NavLink href="phrase" class="btn btn-secondary"> Back to Index</NavLink>
+            </div>
+        </EditForm>
+    }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PhrasesDTO PhraseCode { get; set; } = new PhrasesDTO();
+    private IEnumerable<ApplicationsDTO> AppCategory { get; set; } = new List<ApplicationsDTO>();
+    private IEnumerable<CulturesDTO> ValCulture { get; set; } = new List<CulturesDTO>();
+    private IEnumerable<PagesDTO> ValPage { get; set; } = new List<PagesDTO>();
+    private string Title { get; set; } = "Create";
+    public bool IsLoading { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+
+            if (firstRender)
+            {
+                await LoadPh();
+            }
+        }
+    }
+
+    private async Task LoadPh()
+    {
+        IsLoading=true;
+        StateHasChanged();
+        AppCategory = await _applicationsRepository.GetAll();
+        ValCulture = await _cultureRepository.GetAll();
+        ValPage = await _pagesRepository.GetAll();
+        if (Id!=0)
+        {
+            //update
+            Title = "update";
+            PhraseCode = await _phrasesRepository.Get(Id);
+        }
+        IsLoading=false;
+        StateHasChanged();
+    }
+
+    public async Task UpsertPhrase()
+    {
+        if (PhraseCode.PhraseID==0)
+        {
+            //create
+            await _phrasesRepository.Create(PhraseCode);
+            await _jsRuntime.ToastrSuccess("Phrases created successfully.");
+        }
+        else
+        {
+            //update
+            await _phrasesRepository.Update(PhraseCode);
+            await _jsRuntime.ToastrSuccess("Phrase updated successfully.");
+        }
+        _navigationManager.NavigateTo("phrase");
+    }
+
+
+}
